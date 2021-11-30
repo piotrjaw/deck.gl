@@ -49,21 +49,6 @@ void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.pickingColor = instancePickingColors;
 
-  #ifdef MODULE_PBR
-    // set PBR data
-    #ifdef HAS_NORMALS
-      pbr_vNormal = project_normal(instanceModelMatrix * (sceneModelMatrix * vec4(NORMAL.xyz, 0.0)).xyz);
-      geometry.normal = pbr_vNormal;
-    #endif
-
-    #ifdef HAS_UV
-      pbr_vUV = TEXCOORD_0;
-    #else
-      pbr_vUV = vec2(0., 0.);
-    #endif
-    geometry.uv = pbr_vUV;
-  #endif
-
   float originalSize = project_size_to_pixel(sizeScale);
   float clampedSize = clamp(originalSize, sizeMinPixels, sizeMaxPixels);
 
@@ -77,12 +62,24 @@ void main(void) {
     DECKGL_FILTER_SIZE(pos, geometry);
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64Low, pos, geometry.position);
   }
-  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   #ifdef MODULE_PBR
     // set PBR data
     pbr_vPosition = geometry.position.xyz;
+    #ifdef HAS_NORMALS
+      pbr_vNormal = project_normal(instanceModelMatrix * (sceneModelMatrix * vec4(NORMAL.xyz, 0.0)).xyz);
+      geometry.normal = pbr_vNormal;
+    #endif
+
+    #ifdef HAS_UV
+      pbr_vUV = TEXCOORD_0;
+    #else
+      pbr_vUV = vec2(0., 0.);
+    #endif
+    geometry.uv = pbr_vUV;
   #endif
+
+  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   vColor = instanceColors;
   DECKGL_FILTER_COLOR(vColor, geometry);
